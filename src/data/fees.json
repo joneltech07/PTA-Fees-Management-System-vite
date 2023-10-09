@@ -1,0 +1,11 @@
+[
+    {"id": 0, "text":"PTA Membership", "amount": 70, "checked": true},
+    {"id": 1, "text":"Salary", "amount": 170, "checked": true},
+    {"id": 2, "text":"SSG", "amount": 50, "checked": true},
+    {"id": 3, "text":"School Paper", "amount": 90, "checked": true},
+    {"id": 4, "text":"Org Fund", "amount": 85, "checked": true},
+    {"id": 5, "text":"Financial Aid", "amount": 5, "checked": true},
+    {"id": 6, "text":"Grade Level", "amount": 150, "checked": true},
+    {"id": 7, "text":"Anti TB", "amount": 5, "checked": true},
+    {"id": 8, "text":"Contingency", "amount": 75, "checked": true}
+]
