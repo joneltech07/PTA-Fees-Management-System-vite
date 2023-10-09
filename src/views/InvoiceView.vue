@@ -1,17 +1,19 @@
 <script setup>
 import { ref } from 'vue'
-import Fees from '@/data/fees.json'
 import Discount from '@/data/discount.json';
 import PaidFees from '@/data/paid_fees'
 
 
 const paidFees = ref(PaidFees)
 
+defineProps({
+    data: Object
+})
 </script>
 
 <template>
     <div class="container mt-3">
-        <div class="mb-3">Total: 0.00</div>
+        <div class="mb-3">Total: {{ data.total_fee }}</div>
 
         <div class="fees">
             <div class="row">
@@ -23,10 +25,9 @@ const paidFees = ref(PaidFees)
                 </div>
             </div>
             <div class="row"
-                v-for="pf in paidFees">
-                <div class="col">{{ pf.fee_id }}</div>
-                <div class="col">{{ pf.LRN }}</div>
-                <div class="col text-end">0.00</div>
+                v-for="pf in data.selectedFees">
+                <div class="col">{{ pf.fee_name }}</div>
+                <div class="col text-end">{{ pf.fee_amount }}</div>
                 <hr>
             </div>
         </div>

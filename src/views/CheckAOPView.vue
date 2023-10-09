@@ -2,9 +2,10 @@
 import {useRoute, useRouter} from "vue-router"
 import { computed, ref, onBeforeMount, watch, defineEmits } from 'vue'
 import students from "../data/students.json"
-import Fees from '../data/fees.json'
+import Fees from '@/data/fees.json'
 import AreasOfPayment from "@/components/AreasOfPayment.vue";
-import PaidFees from "@/data/paid_fees.json";
+
+const emit = defineEmits(['data'])
 
 const route = useRoute()
 const router = useRouter()
@@ -27,32 +28,31 @@ const fees = computed(() => {
 // total payed fees
 const total = ref(0)
 
-// Record selected fees
-const selectedFees = ref([{id: Number, isChecked: Boolean}])
-const paidFees = ref(PaidFees)
-const paid_fees = () => {
-    if (selectedFees.isChecked) {
-        if (!paidFees.value.find(data => data.fee_id === selectedFees.id)){
-            paidFees.value.push({
-                fee_id: selectedFees.id,
-                OR_num: String,
-                LRN: lrn
-            }) 
-        }
+// selected fees
+const selectedFees = ref([{ fee_name: '', fee_amount: 0 }])
+const paid_fees = (fee) => {
+    selectedFees.value = selectedFees.value.filter(data => data.fee_name !== '')
+    if (fee.isChecked) {
+        total.value += fee.amount
+        selectedFees.value.push({
+            fee_name: fee.name,
+            fee_amount: fee.amount
+        })
         return
     }
-    paidFees.value = paidFees.value.filter(data => data.fee_id !== selectedFees.id)
+    total.value -= fee.amount
+    selectedFees.value = selectedFees.value.filter(data => data.fee_name !== fee.name)
 }
-watch(selectedFees, paid_fees)
+
+// pass to parent view
+emit('data', {selectedFees: selectedFees.value, total_fee: total.value})
+watch(total, () => {
+    emit('data', {selectedFees: selectedFees.value, total_fee: total.value})
+})
 
 </script>
 
 <template>
-    <!-- Test print -->
-    <div v-for="pf in paidFees">
-        {{ pf.fee_id }}
-    </div>
-
     <!-- Select or unselect fees to be payed -->
     <div v-for="f in fees" 
         :key="f.id" 
@@ -62,7 +62,7 @@ watch(selectedFees, paid_fees)
             :name="f.text"
             :amount="f.amount"
             :is-checked="f.checked"
-            @AOP="(data) => selectedFees = data"
+            @AOP="(data) => paid_fees(data)"
         />
     </div>
 </template>

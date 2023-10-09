@@ -2,7 +2,6 @@
 import {useRoute, useRouter} from "vue-router"
 import { computed, ref, onBeforeMount, watch } from 'vue'
 import students from "../data/students.json"
-import Fees from '../data/fees.json'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,18 +16,10 @@ onBeforeMount(() => {
 })
 
 
-// get the fees needed to pay
-const fees = computed(() => {
-    return Fees.filter((f) => f.checked)
-})
 
+const Data = ref(Object)
 // total payed fees
 const total = ref(0)
-
-// add and subtract fees function
-const calc = (checked, amount) => {
-    checked ? total.value += amount : total.value -= amount
-}
 
 // route properties
 let id = 0
@@ -50,6 +41,8 @@ const nextNav = () => {
 watch(navIndex, () => {
     routeLabel.value = routeItems.value.find(m => m.id === navIndex.value).label
 })
+
+
 </script>
 
 <template>
@@ -62,7 +55,7 @@ watch(navIndex, () => {
             <div>
                 {{ routeLabel }}
             </div>
-            <strong>Total: <span>{{ total }}</span></strong>
+            <strong>Total: <span>{{ Data.total_fee }}</span></strong>
             <input id="nextBtn" class="btn btn-primary" type="button" value="Next"
                 @click="nextNav">
         </div>
@@ -84,7 +77,9 @@ watch(navIndex, () => {
                 </div>
             </div>
             <div class="section border col-sm-8">
-                <router-view></router-view>
+                <router-view
+                    :data = Data
+                    @data="(data) => Data = data"></router-view>
             </div>
         </div>
     </div>

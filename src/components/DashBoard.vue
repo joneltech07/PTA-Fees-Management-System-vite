@@ -4,10 +4,10 @@
 <div id="app">
     <div class="container-fluid">
         <div class="row">
-            <div class="col col-lg-2">
+            <div class="col col-lg-1">
                 <Menu />
             </div>
-            <div class="col m-3">
+            <div class="col m-2">
                 <router-view></router-view>
             </div>
         </div>

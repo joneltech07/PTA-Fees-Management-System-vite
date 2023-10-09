@@ -9,7 +9,7 @@ const props = defineProps({
 
 const isChecked = ref(props.isChecked)
 const emit = defineEmits(['AOP'])
-// emit('AOP', {id: props.id, isChecked: isChecked})
+emit('AOP', {isChecked: isChecked, name: props.name, amount: props.amount})
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const emit = defineEmits(['AOP'])
             v-model="isChecked"
             @click="{
                 isChecked = !isChecked
-                $emit('AOP', {id: id, isChecked: isChecked});
+                $emit('AOP', {isChecked: isChecked, name: name, amount: amount});
             }"
             >
         {{ name }}
