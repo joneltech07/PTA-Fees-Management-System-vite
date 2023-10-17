@@ -2,6 +2,7 @@
 import {useRoute, useRouter} from "vue-router"
 import { computed, ref, onBeforeMount, watch } from 'vue'
 import students from "../data/students.json"
+import PaymentModal from "../modal/PaymentModal.vue"
 
 const route = useRoute()
 const router = useRouter()
@@ -30,12 +31,23 @@ const routeItems = ref([
 ])
 const navIndex = ref(0)
 const routeLabel = ref(routeItems.value.find(m => m.id === navIndex.value).label)
+
+// open key for payment modal
+const isOpenModal = ref(false)
+// Button value
+const buttonValue = ref('Next')
 // navigate views accourding to id
 const nextNav = () => {
-    if (navIndex.value < 2) {
+    if (navIndex.value < 1) {
         navIndex.value = navIndex.value+1
-        router.push(routeItems.value.find(m => m.id === navIndex.value).path)
-    } 
+        router.push({
+            path: routeItems.value.find(m => m.id === navIndex.value).path,
+            query: { test: "hey this is testing"}
+        })
+    } else {
+        isOpenModal.value = true
+    }
+    buttonValue.value = 'Proceed to Payment'
 }
 
 watch(navIndex, () => {
@@ -50,13 +62,13 @@ watch(navIndex, () => {
         <div class="container-fluid d-flex flex-row justify-content-between align-items-center mb-3">
             <button class="btn btn-primary" @click="{
                 router.back();
-                navIndex = navIndex > 0 ? navIndex-1 : 0
+                navIndex = navIndex > 0 ? navIndex-1 : 0;
+                buttonValue = 'Next'
             }">Go Back</button>
             <div>
                 {{ routeLabel }}
             </div>
-            <strong>Total: <span>{{ Data.total_fee }}</span></strong>
-            <input id="nextBtn" class="btn btn-primary" type="button" value="Next"
+            <input id="nextBtn" class="btn btn-primary" type="button" :value="buttonValue"
                 @click="nextNav">
         </div>
         <hr>
@@ -83,6 +95,14 @@ watch(navIndex, () => {
             </div>
         </div>
     </div>
+
+    <Teleport to="body">
+        <div v-if="isOpenModal" class="modal">
+            <PaymentModal
+                @close="isOpenModal = false"
+            />
+        </div>
+    </Teleport>
 </template>
 
 <style scoped>
@@ -94,4 +114,8 @@ watch(navIndex, () => {
     position: relative;
 }
 
+.modal {
+    display: block;
+    z-index: 9999;
+}
 </style>

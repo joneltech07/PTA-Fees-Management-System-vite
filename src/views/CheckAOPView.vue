@@ -54,16 +54,22 @@ watch(total, () => {
 
 <template>
     <!-- Select or unselect fees to be payed -->
-    <div v-for="f in fees" 
-        :key="f.id" 
-        class="card">
-        <AreasOfPayment 
-            :id="f.id"
-            :name="f.text"
-            :amount="f.amount"
-            :is-checked="f.checked"
-            @AOP="(data) => paid_fees(data)"
-        />
+    <div class="total">
+        Total: {{ total }}
+    </div>
+    <br>
+    <div class="container-fluid">
+        <div v-for="f in fees" 
+            :key="f.id" 
+            class="card">
+            <AreasOfPayment 
+                :id="f.id"
+                :name="f.text"
+                :amount="f.amount"
+                :is-checked="f.checked"
+                @AOP="(data) => paid_fees(data)"
+            />
+        </div>
     </div>
 </template>
 
@@ -77,7 +83,7 @@ watch(total, () => {
 
     display: flex;
     flex-direction: row;    
-    align-items: start;
+    align-items: center;
     justify-content: space-between;
 
     box-shadow: none;
@@ -89,5 +95,15 @@ watch(total, () => {
     cursor: pointer;
 }
 
+.container-fluid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
+.total {
+    position: fixed;
+    z-index: 1;
+    background-color: white;
+}
 </style>

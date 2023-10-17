@@ -4,7 +4,6 @@ import { computed, ref, onBeforeMount, watch } from 'vue'
 import students from "../data/students.json"
 import Discount from '../data/discount.json'
 import SiblingPaymentModal from "@/modal/SiblingPaymentModal.vue"
-import fa from "fontawesome"
 
 const route = useRoute()
 const router = useRouter()
@@ -45,8 +44,9 @@ const selectSibling = (sibling) => {
 </script>
 
 <template>
-    <div class="d-flex flex-row justify-content-between m-3">
-        <div class="top-section d-flex align-items-center gap-3">
+    <div class="container">
+        {{ $route.query.test }}
+        <div class="top-section d-flex align-items-center gap-3 mt-3">
             <span>Quater: </span>
             <select 
                 class="form-select"
@@ -57,16 +57,9 @@ const selectSibling = (sibling) => {
                 <option>4th quater</option>
             </select>
         </div>
-        <div class="top-section input-group w-50">
-            <input v-model="searchInput" type="text" class="form-control" placeholder="Enter LRN, First name, or Last name" aria-label="Recipient's username">
-            <button @click="searchSibling" class="btn btn-secondary" type="button" id="button-addon2">Search</button>
-        </div>
-    </div>
-    <div class="container">
-        <hr>
         <span>Select Discount: </span>
         <br>
-        <div class="discount-options"
+        <div class="discount-options mb-2"
             v-for="d in discount"
             :key="d.id">
             <span>
@@ -78,28 +71,30 @@ const selectSibling = (sibling) => {
             </span>
         </div>
 
-        <div class="discount-options">
-            <span>
-                <input 
-                    class="form-check-input me-1"
-                    type="checkbox"
-                    id="others">
-                <label for="others">others</label>
-            </span>
+        <label>Other Discount:</label>
+        <div class="container-fluid d-flex gap-3">
+            <div class="d-flex align-items-center gap-1">
+                <span>Name: </span>
+                <input id="d_name" type="text" class="form-control" placeholder="discount">
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span>Value: </span>
+                <input type="text" class="form-control" placeholder="%">
+            </div>
         </div>
-
-        <input type="text" class="form-control w-25" placeholder="Discount %">
     </div>
 
     <div class="container-fluid">
         <hr>
-        <div class="container-fluid students">
+        <div class="top-section input-group">
+            <input v-model="searchInput" type="text" class="form-control" placeholder="Enter LRN, First name, or Last name" aria-label="Recipient's username">
+            <button @click="searchSibling" class="btn btn-secondary" type="button" id="button-addon2">Search</button>
+        </div>
+        <div class="students mt-3">
             <div v-for="sibling in siblings" >
                 <div 
                     v-if="sibling.LRN !== stud.LRN" class="card"
-                        @click="selectSibling(sibling)">
-                    <input type="checkbox" class="form-check-input" 
-                    >
+                    @click="selectSibling(sibling)">
                     <span>LRN: {{ sibling.LRN }}</span>
                     <span>First Name: {{ sibling.firstName }}</span>
                     <span>Middle Name: {{ sibling.middleName }}</span>
@@ -127,13 +122,17 @@ const selectSibling = (sibling) => {
 <style scoped>
 .discount-options {
     display: inline-block;
-    margin: 10px;
+    margin-top: 10px;
+    margin-left: 10px;
 }
 
 .card {
     margin-bottom: 15px;
     padding: 5px;
-    border: none;
+    padding-right: 10px;
+    padding-left: 10px;
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.095);
 
     display: flex;
     flex-direction: row;    
@@ -151,6 +150,10 @@ const selectSibling = (sibling) => {
 
 .form-check-input:hover {
     cursor: pointer;
+}
+
+input:hover, select:hover {
+    border-color: black;
 }
 
 .modal {
