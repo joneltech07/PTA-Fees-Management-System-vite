@@ -1,11 +1,24 @@
 <script setup>
 import { ref, defineEmits } from 'vue'
+import axios from 'redaxios'
 
 const emit = defineEmits(['response', 'close'])
 
-const breakdown = ref('')
-const amount = ref('')
+const fee = ref({
+    fee_type: '',
+    fee_amount: '',
+})
 
+const addBreakdown = () => {
+    axios.post("http://127.0.0.1:8000/api/fees", fee.value)
+    .then((response) => {
+        alert("Inserted!!!")
+        emit('close')
+    })
+    .catch((error) => {
+        console.error("Error while posting data:", error);
+    });
+}
 
 </script>
 
@@ -30,12 +43,12 @@ const amount = ref('')
                     <input 
                         class="form-control w-75 border-dark mb-3" 
                         placeholder="Breakdown name"
-                        v-model="breakdown"
+                        v-model="fee.fee_type"
                     >
                     <input 
                         class="form-control w-75 border-dark" 
-                        placeholder="Amout"
-                        v-model="amount"
+                        placeholder="Amount"
+                        v-model="fee.fee_amount"
                     >
                 </div>
                 <div class="modal-footer">
@@ -43,10 +56,7 @@ const amount = ref('')
                     <button 
                         type="button" 
                         class="btn btn-primary"
-                        @click="{
-                            $emit('response', [{breakdown: breakdown, amount: amount}]);
-                            $emit('close')
-                        }"
+                        @click="addBreakdown"
                     >
                         Add Breakdown
                     </button>

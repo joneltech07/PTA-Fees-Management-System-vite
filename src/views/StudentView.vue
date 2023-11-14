@@ -4,6 +4,9 @@ import { computed, ref, onBeforeMount, watch } from 'vue'
 import students from "../data/students.json"
 import PaymentModal from "../modal/PaymentModal.vue"
 
+import axios from 'redaxios'
+import { store } from '../store/index'
+
 const route = useRoute()
 const router = useRouter()
 
@@ -40,10 +43,7 @@ const buttonValue = ref('Next')
 const nextNav = () => {
     if (navIndex.value < 1) {
         navIndex.value = navIndex.value+1
-        router.push({
-            path: routeItems.value.find(m => m.id === navIndex.value).path,
-            query: { test: "hey this is testing"}
-        })
+        router.push(routeItems.value.find(m => m.id === navIndex.value).path)
     } else {
         isOpenModal.value = true
     }
@@ -55,6 +55,87 @@ watch(navIndex, () => {
 })
 
 
+
+// Load Data
+
+// Schoo Year
+const SchoolYearLoad = () => {
+    const api = "http://127.0.0.1:8000/api/school_year"
+    axios.get(api)
+    .then(({data}) => {
+        store.schoolYear = data
+    })
+}
+SchoolYearLoad()
+
+// Fees
+const SYFeesLoad = () => {
+    const page = "http://127.0.0.1:8000/api/sy_fee"
+    axios.get(page)
+    .then(
+        ({data})=>{
+            store.syFees = data
+           loadFees()
+        }
+    );
+}
+
+SYFeesLoad()
+
+const FeesLoad = () => {
+    const api = "http://127.0.0.1:8000/api/fees"
+    axios.get(api)
+    .then(({data}) => {
+        store.fees   = data
+    })
+}
+
+FeesLoad()
+
+
+// Dscount
+const DiscountLoad = (id) => {
+    const api = `http://127.0.0.1:8000/api/discount`
+    axios.get(api)
+    .then(({data}) => {
+        store.discount = data
+    })
+}
+DiscountLoad()
+
+const SYDiscountLoad = () => {
+    const page = "http://127.0.0.1:8000/api/sy_discount"
+    axios.get(page)
+    .then(
+        ({data})=>{
+            store.syDiscount = data
+        }
+    );
+}
+SYDiscountLoad()
+
+
+// Load Data
+const selectSY = ref(store.school_year_id)
+
+const loadFees = () => {
+    store.school_year_id = selectSY.value
+    store.resetFees()
+    store.resetDiscount()
+
+    const filteredSYFees = store.syFees.filter((sy) => sy.sy_id === selectSY.value)
+    const filteredSYDiscount = store.syDiscount.filter((sy) => sy.sy_id === selectSY.value)
+
+    for (let x in filteredSYFees) {
+        store.putFees(store.fees.find(f => f.id === filteredSYFees[x].fee_id))
+    }
+    for (let x in filteredSYDiscount) {
+        store.putDiscount(store.discount.find(d => d.id === filteredSYDiscount[x].discount_id))
+    }
+}
+loadFees()
+watch(selectSY, loadFees)
+
 </script>
 
 <template>
@@ -65,6 +146,15 @@ watch(navIndex, () => {
                 navIndex = navIndex > 0 ? navIndex-1 : 0;
                 buttonValue = 'Next'
             }">Go Back</button>
+            
+            <div>
+                <select v-model="selectSY" class="form-select">
+                    <option v-for="sy in store.schoolYear" :key="sy.id" :value="sy.id">
+                        {{ sy.from_year }} - {{ sy.to_year }}
+                    </option>
+                </select>
+            </div>
+
             <div>
                 {{ routeLabel }}
             </div>
@@ -89,9 +179,7 @@ watch(navIndex, () => {
                 </div>
             </div>
             <div class="section border col-sm-8">
-                <router-view
-                    :data = Data
-                    @data="(data) => Data = data"></router-view>
+                <router-view></router-view>
             </div>
         </div>
     </div>

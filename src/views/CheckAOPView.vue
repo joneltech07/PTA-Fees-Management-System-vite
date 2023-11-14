@@ -2,8 +2,9 @@
 import {useRoute, useRouter} from "vue-router"
 import { computed, ref, onBeforeMount, watch, defineEmits } from 'vue'
 import students from "../data/students.json"
-import Fees from '@/data/fees.json'
+import axios from 'redaxios'
 import AreasOfPayment from "@/components/AreasOfPayment.vue";
+import { store } from "../store";
 
 const emit = defineEmits(['data'])
 
@@ -20,35 +21,16 @@ onBeforeMount(() => {
 })
 
 
-// get the active fees
-const fees = computed(() => {
-    return Fees.filter((f) => f.checked)
-})
-
-// total payed fees
+// Total of fees amount
 const total = ref(0)
-
-// selected fees
-const selectedFees = ref([{ fee_name: '', fee_amount: 0 }])
-const paid_fees = (fee) => {
-    selectedFees.value = selectedFees.value.filter(data => data.fee_name !== '')
-    if (fee.isChecked) {
-        total.value += fee.amount
-        selectedFees.value.push({
-            fee_name: fee.name,
-            fee_amount: fee.amount
-        })
+const totalFunction = (data) => {
+    if(data.isChecked) {
+        total.value += store.fees.find(f => f.id === data.id).fee_amount
         return
     }
-    total.value -= fee.amount
-    selectedFees.value = selectedFees.value.filter(data => data.fee_name !== fee.name)
-}
 
-// pass to parent view
-emit('data', {selectedFees: selectedFees.value, total_fee: total.value})
-watch(total, () => {
-    emit('data', {selectedFees: selectedFees.value, total_fee: total.value})
-})
+    total.value -= store.fees.find(f => f.id === data.id).fee_amount
+}
 
 </script>
 
@@ -57,17 +39,22 @@ watch(total, () => {
     <div class="total">
         Total: {{ total }}
     </div>
+
+    <div class="float-end">
+        {{ store.paymentDetails.fees }}
+    </div>
+
     <br>
     <div class="container-fluid">
-        <div v-for="f in fees" 
+        <div
+            v-for="f in store.filteredFees" 
             :key="f.id" 
             class="card">
             <AreasOfPayment 
                 :id="f.id"
-                :name="f.text"
-                :amount="f.amount"
-                :is-checked="f.checked"
-                @AOP="(data) => paid_fees(data)"
+                :name="f.fee_type"
+                :amount="f.fee_amount"
+                @clicked="(data) => totalFunction(data)"
             />
         </div>
     </div>
@@ -76,8 +63,10 @@ watch(total, () => {
 <style scoped>
 
 .card {
-    width: 70%;
-    margin: 20px;
+    width: 100%;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 20px;
     padding: 10px;
     border: none;
 

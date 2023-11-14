@@ -2,8 +2,9 @@
 import {useRoute, useRouter} from "vue-router"
 import { computed, ref, onBeforeMount, watch } from 'vue'
 import students from "../data/students.json"
-import Discount from '../data/discount.json'
+import axios from 'redaxios'
 import SiblingPaymentModal from "@/modal/SiblingPaymentModal.vue"
+import { store } from "../store"
 
 const route = useRoute()
 const router = useRouter()
@@ -29,10 +30,6 @@ const searchSibling = () => {
     )
 }
 
-// get discount names
-const discount = computed(() => {
-    return Discount.filter((d) => d.checked)
-})
 
 const isOpenModal = ref(false)
 const selectedSibling = ref('')
@@ -41,12 +38,14 @@ const selectSibling = (sibling) => {
     isOpenModal.value = true
     selectedSibling.value = sibling
 }
+
+
+
 </script>
 
 <template>
     <div class="container">
-        {{ $route.query.test }}
-        <div class="top-section d-flex align-items-center gap-3 mt-3">
+        <div class="top-section d-flex align-items-center gap-3 mt-3 w-50">
             <span>Quater: </span>
             <select 
                 class="form-select"
@@ -60,27 +59,29 @@ const selectSibling = (sibling) => {
         <span>Select Discount: </span>
         <br>
         <div class="discount-options mb-2"
-            v-for="d in discount"
+            v-for="d in store.filteredDiscount"
             :key="d.id">
             <span>
                 <input 
                     class="form-check-input me-1"
                     type="checkbox"
-                    :id="d.id">
-                <label :for="d.id">{{ d.text }}</label>
+                    :id="d.id"
+                    :value="d.id"
+                    v-model="store.paymentDetails.discount">
+                <label :for="d.id">{{ d.discount_type }}</label>
             </span>
         </div>
 
-        <label>Other Discount:</label>
-        <div class="container-fluid d-flex gap-3">
+        <div class="container-fluid d-flex gap-3 align-items-center">
+            <label>Other Discount:</label>
             <div class="d-flex align-items-center gap-1">
-                <span>Name: </span>
-                <input id="d_name" type="text" class="form-control" placeholder="discount">
+                <input id="d_name" type="text" class="form-control" placeholder="discount name">
             </div>
-            <div class="d-flex align-items-center gap-1">
-                <span>Value: </span>
-                <input type="text" class="form-control" placeholder="%">
-            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-1 mb-3 w-50 mt-3">
+            <span>discount: </span>
+            <input type="text" class="form-control" placeholder="value">
         </div>
     </div>
 

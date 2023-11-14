@@ -1,10 +1,22 @@
 <script setup>
 import { ref, defineEmits } from 'vue'
+import axios from 'redaxios';
+import { store } from '../store/index'
 
-const emit = defineEmits(['response', 'close'])
+const emit = defineEmits(['close'])
 
-const discount = ref('')
-
+const discount = ref({discount_type: ''})
+const addDiscount = () => {
+    axios.post("http://127.0.0.1:8000/api/discount", discount.value)
+    .then((response) => {
+        alert("Inserted!!!")
+        store.putSYId(response.data.id)
+        emit('close')
+    })
+    .catch((error) => {
+        alert(`Error while posting data:${error}`);
+    });
+}
 </script>
 
 <template>
@@ -28,11 +40,7 @@ const discount = ref('')
                     <input 
                         class="form-control w-75 border-dark mb-3" 
                         placeholder="Discount name"
-                        v-model="discount"
-                    >
-                    <input 
-                        class="form-control w-75 border-dark mb-3" 
-                        placeholder="Percentage"
+                        v-model="discount.discount_type"
                     >
                 </div>
                 <div class="modal-footer">
@@ -40,7 +48,7 @@ const discount = ref('')
                     <button 
                         type="button" 
                         class="btn btn-primary"
-                        @click="{$emit('response', discount); $emit('close')}"
+                        @click="addDiscount"
                     >
                         Add Discount
                     </button>

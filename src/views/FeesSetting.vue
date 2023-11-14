@@ -1,6 +1,8 @@
 <script setup>
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRouter } from "vue-router"
+import axios from "redaxios"
+import { store } from '../store/index'
 
 const router = useRouter()
 
@@ -20,13 +22,63 @@ const nextNav = () => {
         navIndex.value = navIndex.value+1
         router.push(`/fees-setting${menuItem.value.find(m => m.id === navIndex.value).path}`)
     } else {
-        router.push("/")
+        addSY()
+        // router.push("/")
     }
 }
+
+
 // change button label from 'Next' to 'Save' if it reached the last step
 watch(navIndex, () => {
     buttonLabel.value = navIndex.value === 2 ?  "Save" : "Next"
 })
+
+
+
+
+const addSY = async() => {
+    await axios.post("http://127.0.0.1:8000/api/school_year", store.school_year)
+    .then((response) => {
+        store.putSYId(response.data.id)
+        addSYFees()
+        addSYDiscounts()
+        router.push("/")
+    })
+    .catch((error) => {
+        console.error("Error while posting data:", error);
+    });
+}
+
+const addSYFees = async() => {
+    for (let x in store.sy_fees.fees) {
+        await axios.post("http://127.0.0.1:8000/api/sy_fee", {
+            "sy_id" : store.sy_fees.id,
+            "fee_id" : store.sy_fees.fees[x]
+        })
+        .then((response) => {
+            // alert("Fee Inserted!!!")
+        })
+        .catch((error) => {
+            console.error("Error while posting data:", error);
+        });
+    }
+}
+
+const addSYDiscounts = async() => {
+    for (let x in store.sy_fees.fees) {
+        await axios.post("http://127.0.0.1:8000/api/sy_discount", {
+            "sy_id" : store.sy_fees.id,
+            "discount_id" : store.sy_fees.discount[x]
+        })
+        .then((response) => {
+            // alert("Discount Inserted!!!")
+        })
+        .catch((error) => {
+            console.error("Error while posting data:", error);
+        });
+    }
+}
+
 
 </script>
 

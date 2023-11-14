@@ -2,15 +2,12 @@
 import { ref, computed, watch } from 'vue';
 import EditModal from '../modal/EditModal.vue';
 import AddModal from "../modal/AddModal.vue";
-import Fees from '../data/fees.json'
+import axios from 'redaxios'
+import { store } from '../store/index'
 
 
 const isOpen = ref([{edit: false, add: false}])                     // for close and open modals
-const selected = ref({id: Number, text: String, amount: Number, checked: Boolean})                                             // selected table row (used for editing)
-const newBreakdown = ref([{breakdown: String, amount: Number}])     // for adding new breakdown
-
-// temporary data
-const breakdown = ref(Fees)
+const selected = ref({fee_type: String, fee_amount: Number})    // selected table row (used for editing)
 
 // opening and passing data to edit modal
 const passData = (data) => {
@@ -20,47 +17,30 @@ const passData = (data) => {
 }
 
 
-const amount = ref(0)                                       // for storing total amount of all fees selected
-// computing total sum of all fees
-const total = () => {
-    let value = 0
-    // add only the checked one
-    const filtered = computed(() => {
-        return breakdown.value.filter((t) => t.checked)
-    })
-    // adding all filtered amount
-    for (let num=0; num < filtered.value.length; num++) {
-        value += filtered.value[num].amount
-    }
-    amount.value = value
+// Fetch data
+const fees = ref([{fee_type: '', fee_amount: 0}])
+
+const FeesLoad = () => {
+    const page = "http://127.0.0.1:8000/api/fees"
+    axios.get(page)
+    .then(
+        ({data})=>{
+            fees.value = data;
+        }
+    ).catch((error) => {
+        console.error("Error while posting data:", error);
+    });
 }
 
+FeesLoad()
 
-total()                                             // calling function
-
-watch(breakdown.value, total)                       // track changes
-
-// Add breakdown / fee
-const getLastFee = computed(() => {
-    return Fees.slice(-1)[0]
-})
-const addBreakdown = () => {
-    breakdown.value.push({ 
-        id: getLastFee.value.id+1,
-        text: newBreakdown.value[0].breakdown, 
-        amount: parseInt(newBreakdown.value[0].amount), 
-        checked: false
-    })
-    newBreakdown.value[0].breakdown = ''
-    newBreakdown.value[0].amount = 0
-}
-
-watch(newBreakdown, addBreakdown)
+const amount = ref(0)
 
 </script>
 
 <template>
     <div class="container" id="container">
+        {{ store.sy_fees.fees }}
         <div class="add-breakdown float-end">
             <button class="btn btn-primary d-flex align-items-center justify-content-center mb-3"
                 @click="isOpen.add = true"
@@ -82,21 +62,22 @@ watch(newBreakdown, addBreakdown)
                 
             </thead>
             <tbody>
-                <tr v-for="(b, index) in breakdown" 
+                <tr 
+                    v-if="fees"
+                    v-for="(b, index) in fees" 
                     :key="index"
                 >
-                    <td 
-                        @click="b.checked = !b.checked"
-                    >
+                    <td>
                         <input 
                             class="form-check-input me-2"
-                            type="checkbox" 
-                            v-model="b.checked"
+                            type="checkbox"
+                            :value="b.id"
+                            v-model="store.sy_fees.fees"
                         >
-                        <span :class="{unselected: !b.checked}">{{ b.text }}</span>
+                        <span >{{ b.fee_type }}</span>
                     </td>
-                    <td @click="b.checked = !b.checked">
-                        <span :class="{unselected: !b.checked}">{{ b.amount }}</span>
+                    <td>
+                        <span >{{ b.fee_amount }}</span>
                     </td>
                     <td @click="passData(b)">
                         <span 
@@ -115,9 +96,12 @@ watch(newBreakdown, addBreakdown)
     <Teleport to="body">
         <div v-if="isOpen.edit" class="modal">
             <EditModal
-                @close="isOpen.edit = false"
-                :title="selected.text"
-                :msg="selected.amount"
+                @close="{
+                    isOpen.edit = false;
+                    FeesLoad()
+                }"
+                :title="selected.fee_type"
+                :msg="selected.fee_amount"
                 />
         </div>
     </Teleport>
@@ -125,9 +109,10 @@ watch(newBreakdown, addBreakdown)
     <Teleport to="body">
         <div v-if="isOpen.add" class="modal">
             <AddModal
-                @close="isOpen.add = false"
-                @response="(data) => newBreakdown = data"
-            />
+                @close="{
+                    isOpen.add = false;
+                    FeesLoad()
+                }"/>
         </div>
     </Teleport>
     
